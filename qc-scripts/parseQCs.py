@@ -17,6 +17,7 @@
 import sys, os
 import json
 import zipfile
+import argparse
 
 ########################################################################
 # Global Variables
@@ -294,3 +295,27 @@ class BamQM(QMGeneric):
             if field in picard_CollectWgsMetrics:
                 field, tooltip_ = picard_CollectWgsMetrics[field]
                 self.add_value(self.QMValue(field, stats[i], tooltip=tooltip_))
+
+################################################
+#   main
+################################################
+def main(args):
+
+    if not args['qmtype'] in ['BamQM']:
+        sys.exit('Please select a --qmtype. The currently available values are: BamQM')
+
+    if args['qmtype'] == 'BamQM':
+        qm = BamQM()
+
+################################################
+#   Parser
+################################################
+if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser(description='Script to parse the output from several QC software to generate portal-compatible Quality Metric (QM) objects')
+
+    parser.add_argument('-t', '--qmtype', help='Type of quality metrics to generate. Currently available: BamQM', required=True)
+
+    args = vars(parser.parse_args())
+
+    main(args)
