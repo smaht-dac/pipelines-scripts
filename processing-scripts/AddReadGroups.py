@@ -69,7 +69,7 @@ def main(args):
 
     # Variables
     directory = args['directory'] if args['directory'] else '.'
-    platform = args['platform'] if args['platform'] else 'illumina'
+    platform = args['platform'] if args['platform'] else 'ILLUMINA'
     samplename = args['samplename']
     threads = int(args['threads']) if args['threads'] else 1
 
@@ -134,7 +134,7 @@ if __name__ == '__main__':
     parser.add_argument('-t','--threads', help='number of threads to use for compression/decompression', required=False)
     parser.add_argument('-x','--index', action='store_true', help='create index for the output file, the input file must be sorted by coordinates')
     parser.add_argument('-s','--samplename', help='name of the sample', required=True)
-    parser.add_argument('-p','--platform', help='name of the sequencing platform', required=False)
+    parser.add_argument('-p','--platform', help='name of the sequencing platform (ILLUMINA, ION_TORRENT, LS454, PACBIO, COMPLETE_GENOMICS, DNBSEQ) [ILLUMINA]', required=False)
 
     args = vars(parser.parse_args())
 
