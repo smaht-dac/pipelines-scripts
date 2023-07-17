@@ -130,8 +130,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Add read groups to a BAM file')
 
     parser.add_argument('-i','--inputfile', help='input aligned paired-ends BAM file', required=True)
-    parser.add_argument('-d','--directory', help='directory to use to write results', required=False)
-    parser.add_argument('-t','--threads', help='number of threads to use for compression/decompression', required=False)
+    parser.add_argument('-d','--directory', help='directory to use to write results [.]', required=False)
+    parser.add_argument('-t','--threads', help='number of threads to use for compression/decompression [1]', required=False)
     parser.add_argument('-x','--index', action='store_true', help='create index for the output file, the input file must be sorted by coordinates')
     parser.add_argument('-s','--samplename', help='name of the sample', required=True)
     parser.add_argument('-p','--platform', help='name of the sequencing platform (ILLUMINA, ION_TORRENT, LS454, PACBIO, COMPLETE_GENOMICS, DNBSEQ) [ILLUMINA]', required=False)
