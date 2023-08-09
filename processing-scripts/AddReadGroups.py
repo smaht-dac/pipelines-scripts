@@ -41,11 +41,13 @@ def get_read_group(query_name):
     qn_as_list = query_name.split(':')
     l = len(qn_as_list) # number of fields in query_name
     if l == 7: # new style header
-        return '_'.join(qn_as_list[:4])
+        instrument_run_flowcell = '_'.join(qn_as_list[:3])
+        lane = qn_as_list[3]
+        return f'{instrument_run_flowcell}.{lane}'
     elif l == 5: # old style header
-        return '_'.join(qn_as_list[:2])
+        return '.'.join(qn_as_list[:2])
     elif l == 1: # weird style header, just use a placeholder
-        return 'RG_PLACEHOLDER'
+        return 'READGROUP'
     else:
         sys.exit('\nFORMAT ERROR: read format {0} not recognized\n'
                     .format(query_name))
@@ -70,6 +72,7 @@ def main(args):
     # Variables
     directory = args['directory'] if args['directory'] else '.'
     platform = args['platform'] if args['platform'] else 'ILLUMINA'
+    library = args['library'] if args['library'] else 'LIBRARY'
     samplename = args['samplename']
     threads = int(args['threads']) if args['threads'] else 1
 
@@ -77,20 +80,20 @@ def main(args):
     pipe_in = subprocess.Popen(['samtools', 'view', '-h', '-@ {0}'.format(threads), args['inputfile']], stdout=subprocess.PIPE)
 
     # Data structures
-    IDs = set()
+    QNAMEs = set()
 
-    # Read header and all possible IDs
+    # Read header and all possible QNAMEs
     samfile = ps.AlignmentFile(pipe_in.stdout, 'r')
 
     header = cp.deepcopy(dict(samfile.header))
     header.setdefault('RG', [])
 
     for read in samfile:
-        ID = get_read_group(read.query_name)
-        IDs.add(ID)
+        QNAME = get_read_group(read.query_name)
+        QNAMEs.add(QNAME)
 
     # Update header with read groups
-    {header['RG'].append({'ID': ID, 'PL': platform, 'PU': ID, 'LB': ID, 'SM': samplename}) for ID in IDs}
+    {header['RG'].append({'ID': f'{samplename}.{QNAME}', 'SM': samplename, 'PL': platform, 'PU': QNAME, 'LB': f'{samplename}.{library}'}) for QNAME in QNAMEs}
 
     # Open output file
     filename = directory + '/' + args['inputfile'].split('/')[-1].split('.')[0] + '_rg' + '.bam'
@@ -106,7 +109,8 @@ def main(args):
     pipe_in = subprocess.Popen(['samtools', 'view', '-h', '-@ {0}'.format(threads), args['inputfile']], stdout=subprocess.PIPE)
     samfile = ps.AlignmentFile(pipe_in.stdout, 'r')
     for read in samfile:
-        ID = get_read_group(read.query_name)
+        QNAME = get_read_group(read.query_name)
+        ID = f'{samplename}.{QNAME}'
         # not using pysam to add read tag because somehow it is doing
         # something extremely slow and locking all the multi-threading
         read_str = read.tostring() + '\t' + 'RG:Z:{0}'.format(ID) + '\n'
@@ -127,14 +131,15 @@ def main(args):
 ################################################
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(description='Add read groups to a BAM file')
+    parser = argparse.ArgumentParser(description='Add read groups to a BAM file for a single sample')
 
-    parser.add_argument('-i','--inputfile', help='input aligned paired-ends BAM file', required=True)
-    parser.add_argument('-d','--directory', help='directory to use to write results [.]', required=False)
-    parser.add_argument('-t','--threads', help='number of threads to use for compression/decompression [1]', required=False)
-    parser.add_argument('-x','--index', action='store_true', help='create index for the output file, the input file must be sorted by coordinates')
-    parser.add_argument('-s','--samplename', help='name of the sample', required=True)
-    parser.add_argument('-p','--platform', help='name of the sequencing platform (ILLUMINA, ION_TORRENT, LS454, PACBIO, COMPLETE_GENOMICS, DNBSEQ) [ILLUMINA]', required=False)
+    parser.add_argument('-i','--inputfile', help='Input BAM file', required=True)
+    parser.add_argument('-s','--samplename', help='Name of the sample', required=True)
+    parser.add_argument('-l','--library', help='Identifier for the sequencing library preparation [LIBRARY]', required=False)
+    parser.add_argument('-p','--platform', help='Name of the sequencing platform (ILLUMINA, ION_TORRENT, LS454, PACBIO, COMPLETE_GENOMICS, DNBSEQ) [ILLUMINA]', required=False)
+    parser.add_argument('-d','--directory', help='Directory to use to write results [.]', required=False)
+    parser.add_argument('-t','--threads', help='Number of threads to use for compression/decompression [1]', required=False)
+    parser.add_argument('-x','--index', action='store_true', help='Create index for the output file, the input file must be sorted by coordinates')
 
     args = vars(parser.parse_args())
 
