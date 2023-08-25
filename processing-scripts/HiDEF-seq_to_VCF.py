@@ -200,7 +200,7 @@ def main(args):
                 else:
                     filename_ = f'{basename}_{var.sampleid}_{var.filterid}.vcf'
                     buffer_ = open(filename_, 'w')
-                    samplesfilters.append(f'{var.sampleid}_{var.filterid}')
+                    samplesfilters.append(samplefilter)
                     output_buffers.append(buffer_)
                     header = format_header(
                             version,
