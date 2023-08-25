@@ -186,22 +186,19 @@ def main(args):
     VAF = '##FORMAT=<ID=VAF,Number=3,Type=Float,Description="Variant allele frequency of reads with the same sequence as the call, at the position of the call [GERMLINE_READS, FORWARD_STRAND_SUBREADS, REVERSE_STRAND_SUBREADS]">'
     ALN = '##FORMAT=<ID=ALN,Number=2,Type=Float,Description="Fraction of subreads aligning to the position of the call [FORWARD_STRAND_SUBREADS, REVERSE_STRAND_SUBREADS]">'
 
-    samplesfilters = []
-    output_buffers = []
+    output_buffers = {}
 
     with open(inputfile) as fi:
         for i, line in enumerate(fi):
             if i != 0: # Removing the header
                 var = HIDEFSeqVariant(line)
                 samplefilter = f'{var.sampleid}_{var.filterid}'
-                if samplefilter in samplesfilters:
-                    idx = samplesfilters.index(samplefilter)
-                    output_buffers[idx].write(var.to_VCF())
+                if samplefilter in output_buffers:
+                    output_buffers[samplefilter].write(var.to_VCF())
                 else:
                     filename_ = f'{basename}_{samplefilter}.vcf'
                     buffer_ = open(filename_, 'w')
-                    samplesfilters.append(samplefilter)
-                    output_buffers.append(buffer_)
+                    output_buffers.setdefault(samplefilter, buffer_)
                     header = format_header(
                             version,
                             [
@@ -217,7 +214,7 @@ def main(args):
                     buffer_.write(header)
                     buffer_.write(var.to_VCF())
 
-    for buffer_ in output_buffers:
+    for _, buffer_ in output_buffers.items():
         buffer_.close()
 
 
