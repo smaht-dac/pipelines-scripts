@@ -198,7 +198,7 @@ def main(args):
                     idx = samplesfilters.index(samplefilter)
                     output_buffers[idx].write(var.to_VCF())
                 else:
-                    filename_ = f'{basename}_{var.sampleid}_{var.filterid}.vcf'
+                    filename_ = f'{basename}_{samplefilter}.vcf'
                     buffer_ = open(filename_, 'w')
                     samplesfilters.append(samplefilter)
                     output_buffers.append(buffer_)
