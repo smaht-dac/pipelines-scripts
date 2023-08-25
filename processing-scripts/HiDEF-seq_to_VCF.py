@@ -17,6 +17,42 @@ import sys, argparse, os
 
 
 ################################################
+#   Global
+################################################
+# VCF VERSION
+VERSION = '##fileformat=VCFv4.2'
+
+# INFO DEFINITIONS
+STRANDTYPE = '##INFO=<ID=STRANDTYPE,Number=1,Type=String,Description="ssDNA (ssDNA mismatch) or dsDNA (dsDNA mutation)">'
+SYNTHESIZEDSTRAND = '##INFO=<ID=SYNTHESIZEDSTRAND,Number=1,Type=String,Description="The strand of the reference genome to which the strand synthesized during sequencing aligned (+ or -)">'
+TEMPLATESTRAND = '##INFO=<ID=TEMPLATESTRAND,Number=1,Type=String,Description="The strand of the reference genome to which the \'template strand being copied during sequencing\' aligned (+ or -). This is the reverse of SYNTHESIZEDSTRAND">'
+REF_REFPLUSSTRAND = '##INFO=<ID=REF_REFPLUSSTRAND,Number=1,Type=String,Description="Sequence of the reference genome on the reference plus strand">'
+ALT_REFPLUSSTRAND = '##INFO=<ID=ALT_REFPLUSSTRAND,Number=1,Type=String,Description="Sequence of the call on the reference plus strand">'
+TNC_REFPLUSSTRAND = '##INFO=<ID=TNC_REFPLUSSTRAND,Number=1,Type=String,Description="Trinucleotide context of the reference genome on the reference plus strand">'
+REF32_REFPLUSSTRAND = '##INFO=<ID=REF32_REFPLUSSTRAND,Number=1,Type=String,Description="Sequence of the reference genome on the reference plus strand, then transformed to the strand where the reference base is a pyrimidine">'
+ALT32_REFPLUSSTRAND = '##INFO=<ID=ALT32_REFPLUSSTRAND,Number=1,Type=String,Description="Sequence of the call on the reference plus strand, then transformed to the strand where the reference base is a pyrimidine">'
+TNC32_REFPLUSSTRAND = '##INFO=<ID=TNC32_REFPLUSSTRAND,Number=1,Type=String,Description="Trinucleotide context of the reference genome on the reference plus strand, then transformed to the strand where the reference base is a pyrimidine">'
+REF_SSDNASYNTHESIZEDSTRAND = '##INFO=<ID=REF_SSDNASYNTHESIZEDSTRAND,Number=1,Type=String,Description="Sequence of the reference genome on the strand synthesized during sequencing">'
+ALT_SSDNASYNTHESIZEDSTRAND = '##INFO=<ID=ALT_SSDNASYNTHESIZEDSTRAND,Number=1,Type=String,Description="Sequence of the call on the strand synthesized during sequencing">'
+TNC_SSDNASYNTHESIZEDSTRAND = '##INFO=<ID=TNC_SSDNASYNTHESIZEDSTRAND,Number=1,Type=String,Description="Trinucleotide context of the reference genome on the strand synthesized during sequencing">'
+REF_SSDNATEMPLATESTRAND = '##INFO=<ID=REF_SSDNATEMPLATESTRAND,Number=1,Type=String,Description="Sequence of the reference genome on the template strand being copied during sequencing">'
+ALT_SSDNATEMPLATESTRAND = '##INFO=<ID=ALT_SSDNATEMPLATESTRAND,Number=1,Type=String,Description="Sequence of the call on the template strand being copied during sequencing">'
+TNC_SSDNATEMPLATESTRAND = '##INFO=<ID=TNC_SSDNATEMPLATESTRAND,Number=1,Type=String,Description="Trinucleotide context of the reference genome on the template strand being copied during sequencing">'
+
+# FORMAT DEFINITIONS
+RQ = '##FORMAT=<ID=RQ,Number=2,Type=Float,Description="Read quality (\'rq\' tag) of the consensus sequence [FORWARD_STRAND, REVERSE_STRAND]">'
+ECOV = '##FORMAT=<ID=ECOV,Number=2,Type=Float,Description="Effective coverage (\'ec\' tag; i.e., average number of subreads across consensus sequence) of the consensus sequence [FORWARD_STRAND, REVERSE_STRAND]">'
+MAPQ = '##FORMAT=<ID=MAPQ,Number=2,Type=Integer,Description="Mapping quality of the consensus sequence [FORWARD_STRAND, REVERSE_STRAND]">'
+QQ = '##FORMAT=<ID=QQ,Number=2,Type=Integer,Description="Base quality of the call position on the consensus sequence [FORWARD_STRAND, REVERSE_STRAND]">'
+BPD = '##FORMAT=<ID=BPD,Number=1,Type=Integer,Description="Distance of the call in bases from the start or end of the consensus sequence alignment, whichever is closer. Calculated for dsDNA calls on each end using the strand that is closer to the call">'
+MPS = '##FORMAT=<ID=MPS,Number=1,Type=Integer,Description="Number of post-filtering ssDNA or dsDNA calls called on the strand (for ssDNA calls) or duplex DNA molecule (for dsDNA calls), respectively, on which this call was made">'
+VR = '##FORMAT=<ID=VR,Number=3,Type=Integer,Description="Number of reads with the same sequence as the call, at the position of the call [GERMLINE_READS, FORWARD_STRAND_SUBREADS, REVERSE_STRAND_SUBREADS]">'
+TOT = '##FORMAT=<ID=TOT,Number=1,Type=Integer,Description="Total number of germline reads at the position of the call">'
+VAF = '##FORMAT=<ID=VAF,Number=3,Type=Float,Description="Variant allele frequency of reads with the same sequence as the call, at the position of the call [GERMLINE_READS, FORWARD_STRAND_SUBREADS, REVERSE_STRAND_SUBREADS]">'
+ALN = '##FORMAT=<ID=ALN,Number=2,Type=Float,Description="Fraction of subreads aligning to the position of the call [FORWARD_STRAND_SUBREADS, REVERSE_STRAND_SUBREADS]">'
+
+
+################################################
 #   HIDEFSeqVariant
 ################################################
 class HIDEFSeqVariant(object):
@@ -156,36 +192,6 @@ def main(args):
     inputfile = args['inputfile']
     basename = args['outprefix'] if args['outprefix'] else os.path.splitext(os.path.basename(inputfile))[0]
 
-    # VCF VERSION
-    version = '##fileformat=VCFv4.2'
-    # INFO DEFINITIONS
-    STRANDTYPE = '##INFO=<ID=STRANDTYPE,Number=1,Type=String,Description="ssDNA (ssDNA mismatch) or dsDNA (dsDNA mutation)">'
-    SYNTHESIZEDSTRAND = '##INFO=<ID=SYNTHESIZEDSTRAND,Number=1,Type=String,Description="The strand of the reference genome to which the strand synthesized during sequencing aligned (+ or -)">'
-    TEMPLATESTRAND = '##INFO=<ID=TEMPLATESTRAND,Number=1,Type=String,Description="The strand of the reference genome to which the \'template strand being copied during sequencing\' aligned (+ or -). This is the reverse of SYNTHESIZEDSTRAND">'
-    REF_REFPLUSSTRAND = '##INFO=<ID=REF_REFPLUSSTRAND,Number=1,Type=String,Description="Sequence of the reference genome on the reference plus strand">'
-    ALT_REFPLUSSTRAND = '##INFO=<ID=ALT_REFPLUSSTRAND,Number=1,Type=String,Description="Sequence of the call on the reference plus strand">'
-    TNC_REFPLUSSTRAND = '##INFO=<ID=TNC_REFPLUSSTRAND,Number=1,Type=String,Description="Trinucleotide context of the reference genome on the reference plus strand">'
-    REF32_REFPLUSSTRAND = '##INFO=<ID=REF32_REFPLUSSTRAND,Number=1,Type=String,Description="Sequence of the reference genome on the reference plus strand, then transformed to the strand where the reference base is a pyrimidine">'
-    ALT32_REFPLUSSTRAND = '##INFO=<ID=ALT32_REFPLUSSTRAND,Number=1,Type=String,Description="Sequence of the call on the reference plus strand, then transformed to the strand where the reference base is a pyrimidine">'
-    TNC32_REFPLUSSTRAND = '##INFO=<ID=TNC32_REFPLUSSTRAND,Number=1,Type=String,Description="Trinucleotide context of the reference genome on the reference plus strand, then transformed to the strand where the reference base is a pyrimidine">'
-    REF_SSDNASYNTHESIZEDSTRAND = '##INFO=<ID=REF_SSDNASYNTHESIZEDSTRAND,Number=1,Type=String,Description="Sequence of the reference genome on the strand synthesized during sequencing">'
-    ALT_SSDNASYNTHESIZEDSTRAND = '##INFO=<ID=ALT_SSDNASYNTHESIZEDSTRAND,Number=1,Type=String,Description="Sequence of the call on the strand synthesized during sequencing">'
-    TNC_SSDNASYNTHESIZEDSTRAND = '##INFO=<ID=TNC_SSDNASYNTHESIZEDSTRAND,Number=1,Type=String,Description="Trinucleotide context of the reference genome on the strand synthesized during sequencing">'
-    REF_SSDNATEMPLATESTRAND = '##INFO=<ID=REF_SSDNATEMPLATESTRAND,Number=1,Type=String,Description="Sequence of the reference genome on the template strand being copied during sequencing">'
-    ALT_SSDNATEMPLATESTRAND = '##INFO=<ID=ALT_SSDNATEMPLATESTRAND,Number=1,Type=String,Description="Sequence of the call on the template strand being copied during sequencing">'
-    TNC_SSDNATEMPLATESTRAND = '##INFO=<ID=TNC_SSDNATEMPLATESTRAND,Number=1,Type=String,Description="Trinucleotide context of the reference genome on the template strand being copied during sequencing">'
-    # FORMAT DEFINITIONS
-    RQ = '##FORMAT=<ID=RQ,Number=2,Type=Float,Description="Read quality (\'rq\' tag) of the consensus sequence [FORWARD_STRAND, REVERSE_STRAND]">'
-    ECOV = '##FORMAT=<ID=ECOV,Number=2,Type=Float,Description="Effective coverage (\'ec\' tag; i.e., average number of subreads across consensus sequence) of the consensus sequence [FORWARD_STRAND, REVERSE_STRAND]">'
-    MAPQ = '##FORMAT=<ID=MAPQ,Number=2,Type=Integer,Description="Mapping quality of the consensus sequence [FORWARD_STRAND, REVERSE_STRAND]">'
-    QQ = '##FORMAT=<ID=QQ,Number=2,Type=Integer,Description="Base quality of the call position on the consensus sequence [FORWARD_STRAND, REVERSE_STRAND]">'
-    BPD = '##FORMAT=<ID=BPD,Number=1,Type=Integer,Description="Distance of the call in bases from the start or end of the consensus sequence alignment, whichever is closer. Calculated for dsDNA calls on each end using the strand that is closer to the call">'
-    MPS = '##FORMAT=<ID=MPS,Number=1,Type=Integer,Description="Number of post-filtering ssDNA or dsDNA calls called on the strand (for ssDNA calls) or duplex DNA molecule (for dsDNA calls), respectively, on which this call was made">'
-    VR = '##FORMAT=<ID=VR,Number=3,Type=Integer,Description="Number of reads with the same sequence as the call, at the position of the call [GERMLINE_READS, FORWARD_STRAND_SUBREADS, REVERSE_STRAND_SUBREADS]">'
-    TOT = '##FORMAT=<ID=TOT,Number=1,Type=Integer,Description="Total number of germline reads at the position of the call">'
-    VAF = '##FORMAT=<ID=VAF,Number=3,Type=Float,Description="Variant allele frequency of reads with the same sequence as the call, at the position of the call [GERMLINE_READS, FORWARD_STRAND_SUBREADS, REVERSE_STRAND_SUBREADS]">'
-    ALN = '##FORMAT=<ID=ALN,Number=2,Type=Float,Description="Fraction of subreads aligning to the position of the call [FORWARD_STRAND_SUBREADS, REVERSE_STRAND_SUBREADS]">'
-
     output_buffers = {}
 
     with open(inputfile) as fi:
@@ -200,7 +206,7 @@ def main(args):
                     buffer_ = open(filename_, 'w')
                     output_buffers.setdefault(samplefilter, buffer_)
                     header = format_header(
-                            version,
+                            VERSION,
                             [
                                 STRANDTYPE, SYNTHESIZEDSTRAND, TEMPLATESTRAND,
                                 REF_REFPLUSSTRAND, ALT_REFPLUSSTRAND, TNC_REFPLUSSTRAND,
