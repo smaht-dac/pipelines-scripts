@@ -232,7 +232,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Convert HIDEF-seq TSV output to VCF')
 
     parser.add_argument('-i','--inputfile', help='HIDEF-seq output TSV file', required=True)
-    parser.add_argument('--outprefix', help='prefix to use for the outputfile', required=False)
+    parser.add_argument('--outprefix', help='prefix to use for the output file', required=False)
 
     args = vars(parser.parse_args())
 
