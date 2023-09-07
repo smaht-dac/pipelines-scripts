@@ -77,7 +77,7 @@ def main(args):
     threads = int(args['threads']) if args['threads'] else 1
 
     # Open input BAM file using Samtools and send to pipe
-    pipe_in = subprocess.Popen(['samtools', 'view', '-h', '-@ {0}'.format(threads), args['inputfile']], stdout=subprocess.PIPE)
+    pipe_in = subprocess.Popen(['samtools', 'view', '--no-PG', '-h', '-@ {0}'.format(threads), args['inputfile']], stdout=subprocess.PIPE)
 
     # Data structures
     QNAMEs = set()
@@ -100,13 +100,13 @@ def main(args):
     bamfile = open(filename, 'w')
 
     # Buffer to stream output
-    pipe_out = subprocess.Popen(['samtools', 'view', '-b', '-S', '-h', '-@ {0}'.format(threads), '-'], stdin=subprocess.PIPE, stdout=bamfile)
+    pipe_out = subprocess.Popen(['samtools', 'view', '--no-PG', '-b', '-S', '-h', '-@ {0}'.format(threads), '-'], stdin=subprocess.PIPE, stdout=bamfile)
 
     # Write header
     pipe_out.stdin.write(header_as_str(header).encode())
 
     # Add read groups to alignments
-    pipe_in = subprocess.Popen(['samtools', 'view', '-h', '-@ {0}'.format(threads), args['inputfile']], stdout=subprocess.PIPE)
+    pipe_in = subprocess.Popen(['samtools', 'view', '--no-PG', '-h', '-@ {0}'.format(threads), args['inputfile']], stdout=subprocess.PIPE)
     samfile = ps.AlignmentFile(pipe_in.stdout, 'r')
     for read in samfile:
         QNAME = get_read_group(read.query_name)

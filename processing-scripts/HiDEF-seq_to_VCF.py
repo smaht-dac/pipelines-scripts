@@ -24,32 +24,37 @@ VERSION = '##fileformat=VCFv4.2'
 
 # INFO DEFINITIONS
 STRANDTYPE = '##INFO=<ID=STRANDTYPE,Number=1,Type=String,Description="ssDNA (ssDNA mismatch) or dsDNA (dsDNA mutation)">'
-SYNTHESIZEDSTRAND = '##INFO=<ID=SYNTHESIZEDSTRAND,Number=1,Type=String,Description="The strand of the reference genome to which the strand synthesized during sequencing aligned (+ or -)">'
-TEMPLATESTRAND = '##INFO=<ID=TEMPLATESTRAND,Number=1,Type=String,Description="The strand of the reference genome to which the \'template strand being copied during sequencing\' aligned (+ or -). This is the reverse of SYNTHESIZEDSTRAND">'
+SYNTHESIZEDSTRAND = '##INFO=<ID=SYNTHESIZEDSTRAND,Number=1,Type=String,Description="The strand of the reference genome to which the strand synthesized during sequencing aligned (+ or -). Annotated only for STRANDTYPE=ssDNA">'
+TEMPLATESTRAND = '##INFO=<ID=TEMPLATESTRAND,Number=1,Type=String,Description="The strand of the reference genome to which the \'template strand being copied during sequencing\' aligned (+ or -). This is the reverse of SYNTHESIZEDSTRAND. Annotated only for STRANDTYPE=ssDNA">'
 REF_REFPLUSSTRAND = '##INFO=<ID=REF_REFPLUSSTRAND,Number=1,Type=String,Description="Sequence of the reference genome on the reference plus strand">'
 ALT_REFPLUSSTRAND = '##INFO=<ID=ALT_REFPLUSSTRAND,Number=1,Type=String,Description="Sequence of the call on the reference plus strand">'
 TNC_REFPLUSSTRAND = '##INFO=<ID=TNC_REFPLUSSTRAND,Number=1,Type=String,Description="Trinucleotide context of the reference genome on the reference plus strand">'
-REF32_REFPLUSSTRAND = '##INFO=<ID=REF32_REFPLUSSTRAND,Number=1,Type=String,Description="Sequence of the reference genome on the reference plus strand, then transformed to the strand where the reference base is a pyrimidine">'
-ALT32_REFPLUSSTRAND = '##INFO=<ID=ALT32_REFPLUSSTRAND,Number=1,Type=String,Description="Sequence of the call on the reference plus strand, then transformed to the strand where the reference base is a pyrimidine">'
-TNC32_REFPLUSSTRAND = '##INFO=<ID=TNC32_REFPLUSSTRAND,Number=1,Type=String,Description="Trinucleotide context of the reference genome on the reference plus strand, then transformed to the strand where the reference base is a pyrimidine">'
-REF_SSDNASYNTHESIZEDSTRAND = '##INFO=<ID=REF_SSDNASYNTHESIZEDSTRAND,Number=1,Type=String,Description="Sequence of the reference genome on the strand synthesized during sequencing">'
-ALT_SSDNASYNTHESIZEDSTRAND = '##INFO=<ID=ALT_SSDNASYNTHESIZEDSTRAND,Number=1,Type=String,Description="Sequence of the call on the strand synthesized during sequencing">'
-TNC_SSDNASYNTHESIZEDSTRAND = '##INFO=<ID=TNC_SSDNASYNTHESIZEDSTRAND,Number=1,Type=String,Description="Trinucleotide context of the reference genome on the strand synthesized during sequencing">'
-REF_SSDNATEMPLATESTRAND = '##INFO=<ID=REF_SSDNATEMPLATESTRAND,Number=1,Type=String,Description="Sequence of the reference genome on the template strand being copied during sequencing">'
-ALT_SSDNATEMPLATESTRAND = '##INFO=<ID=ALT_SSDNATEMPLATESTRAND,Number=1,Type=String,Description="Sequence of the call on the template strand being copied during sequencing">'
-TNC_SSDNATEMPLATESTRAND = '##INFO=<ID=TNC_SSDNATEMPLATESTRAND,Number=1,Type=String,Description="Trinucleotide context of the reference genome on the template strand being copied during sequencing">'
+REF32_REFPLUSSTRAND = '##INFO=<ID=REF32_REFPLUSSTRAND,Number=1,Type=String,Description="Sequence of the reference genome on the reference plus strand, then transformed to the strand where the reference base is a pyrimidine. Annotated only for STRANDTYPE=dsDNA">'
+ALT32_REFPLUSSTRAND = '##INFO=<ID=ALT32_REFPLUSSTRAND,Number=1,Type=String,Description="Sequence of the call on the reference plus strand, then transformed to the strand where the reference base is a pyrimidine. Annotated only for STRANDTYPE=dsDNA">'
+TNC32_REFPLUSSTRAND = '##INFO=<ID=TNC32_REFPLUSSTRAND,Number=1,Type=String,Description="Trinucleotide context of the reference genome on the reference plus strand, then transformed to the strand where the reference base is a pyrimidine. Annotated only for STRANDTYPE=dsDNA">'
+REF_SSDNASYNTHESIZEDSTRAND = '##INFO=<ID=REF_SSDNASYNTHESIZEDSTRAND,Number=1,Type=String,Description="Sequence of the reference genome on the strand synthesized during sequencing. Annotated only for STRANDTYPE=ssDNA">'
+ALT_SSDNASYNTHESIZEDSTRAND = '##INFO=<ID=ALT_SSDNASYNTHESIZEDSTRAND,Number=1,Type=String,Description="Sequence of the call on the strand synthesized during sequencing. Annotated only for STRANDTYPE=ssDNA">'
+TNC_SSDNASYNTHESIZEDSTRAND = '##INFO=<ID=TNC_SSDNASYNTHESIZEDSTRAND,Number=1,Type=String,Description="Trinucleotide context of the reference genome on the strand synthesized during sequencing. Annotated only for STRANDTYPE=ssDNA">'
+REF_SSDNATEMPLATESTRAND = '##INFO=<ID=REF_SSDNATEMPLATESTRAND,Number=1,Type=String,Description="Sequence of the reference genome on the template strand being copied during sequencing. Annotated only for STRANDTYPE=ssDNA">'
+ALT_SSDNATEMPLATESTRAND = '##INFO=<ID=ALT_SSDNATEMPLATESTRAND,Number=1,Type=String,Description="Sequence of the call on the template strand being copied during sequencing. Annotated only for STRANDTYPE=ssDNA">'
+TNC_SSDNATEMPLATESTRAND = '##INFO=<ID=TNC_SSDNATEMPLATESTRAND,Number=1,Type=String,Description="Trinucleotide context of the reference genome on the template strand being copied during sequencing. Annotated only for STRANDTYPE=ssDNA">'
 
 # FORMAT DEFINITIONS
-RQ = '##FORMAT=<ID=RQ,Number=2,Type=Float,Description="Read quality (\'rq\' tag) of the consensus sequence [FORWARD_STRAND, REVERSE_STRAND]">'
-ECOV = '##FORMAT=<ID=ECOV,Number=2,Type=Float,Description="Effective coverage (\'ec\' tag; i.e., average number of subreads across consensus sequence) of the consensus sequence [FORWARD_STRAND, REVERSE_STRAND]">'
-MAPQ = '##FORMAT=<ID=MAPQ,Number=2,Type=Integer,Description="Mapping quality of the consensus sequence [FORWARD_STRAND, REVERSE_STRAND]">'
-QQ = '##FORMAT=<ID=QQ,Number=2,Type=Integer,Description="Base quality of the call position on the consensus sequence [FORWARD_STRAND, REVERSE_STRAND]">'
+ZMWNAME = '##FORMAT=<ID=ZMWNAME,Number=1,Type=String,Description="Name of the ZMW in the ccs BAM file">'
+ZMWHOLE = '##FORMAT=<ID=ZMWHOLE,Number=1,Type=Integer,Description="ZMW hole # in the ccs BAM file">'
+ISIZE = '##FORMAT=<ID=ISIZE,Number=3,Type=Integer,Description="Length in bases of the strand sequence alignment in the reference genome (excludes insertions and soft-clipped bases) [FORWARD_STRAND, REVERSE_STRAND, OVERLAP_FORWARD_REVERSE_STRAND]">'
+RQ = '##FORMAT=<ID=RQ,Number=2,Type=Float,Description="Read quality (\'rq\' tag) of the strand consensus sequence [FORWARD_STRAND, REVERSE_STRAND]">'
+EC = '##FORMAT=<ID=EC,Number=2,Type=Float,Description="Effective coverage (\'ec\' tag; i.e., average number of subreads across consensus sequence) of the strand consensus sequence [FORWARD_STRAND, REVERSE_STRAND]">'
+MAPQ = '##FORMAT=<ID=MAPQ,Number=2,Type=Integer,Description="Mapping quality of the strand consensus sequence [FORWARD_STRAND, REVERSE_STRAND]">'
+QQ = '##FORMAT=<ID=QQ,Number=2,Type=Integer,Description="Base quality of the call position on the strand consensus sequence (\'.\' if ssDNA call, and the call is not on this strand) [FORWARD_STRAND, REVERSE_STRAND]">'
 BPD = '##FORMAT=<ID=BPD,Number=1,Type=Integer,Description="Distance of the call in bases from the start or end of the consensus sequence alignment, whichever is closer. Calculated for dsDNA calls on each end using the strand that is closer to the call">'
 MPS = '##FORMAT=<ID=MPS,Number=1,Type=Integer,Description="Number of post-filtering ssDNA or dsDNA calls called on the strand (for ssDNA calls) or duplex DNA molecule (for dsDNA calls), respectively, on which this call was made">'
-VR = '##FORMAT=<ID=VR,Number=3,Type=Integer,Description="Number of reads with the same sequence as the call, at the position of the call [GERMLINE_READS, FORWARD_STRAND_SUBREADS, REVERSE_STRAND_SUBREADS]">'
-TOT = '##FORMAT=<ID=TOT,Number=1,Type=Integer,Description="Total number of germline reads at the position of the call">'
-VAF = '##FORMAT=<ID=VAF,Number=3,Type=Float,Description="Variant allele frequency of reads with the same sequence as the call, at the position of the call [GERMLINE_READS, FORWARD_STRAND_SUBREADS, REVERSE_STRAND_SUBREADS]">'
-ALN = '##FORMAT=<ID=ALN,Number=2,Type=Float,Description="Fraction of subreads aligning to the position of the call [FORWARD_STRAND_SUBREADS, REVERSE_STRAND_SUBREADS]">'
+GVR = '##FORMAT=<ID=GVR,Number=1,Type=Integer,Description="Number of germline reads with the same sequence as the call, at the position of the call">'
+GTOT = '##FORMAT=<ID=GTOT,Number=1,Type=Integer,Description="Total number of germline reads at the position of the call">'
+GVAF = '##FORMAT=<ID=GVAF,Number=1,Type=Float,Description="Variant allele frequency of germline reads with the same sequence as the call, at the position of the call">'
+VR = '##FORMAT=<ID=VR,Number=2,Type=Integer,Description="Number of strand subreads with the same sequence as the call (\'.\' if ssDNA call, and the call is not on this strand) [FORWARD_STRAND, REVERSE_STRAND]">'
+VAF = '##FORMAT=<ID=VAF,Number=2,Type=Float,Description="Fraction of strand subreads with the same sequence as the call (\'.\' if ssDNA call, and the call is not on this strand) [FORWARD_STRAND, REVERSE_STRAND]">'
+ALN = '##FORMAT=<ID=ALN,Number=2,Type=Float,Description="Fraction of strand subreads aligning to the position of the call (\'.\' if ssDNA call, and the call is not on this strand) [FORWARD_STRAND, REVERSE_STRAND]">'
 
 
 ################################################
@@ -130,15 +135,20 @@ class HIDEFSeqVariant(object):
         FORMAT = []
         GENOTYPE = []
         ids_tags = {
+            'ZMWNAME': ['zmw_name'],
+            'ZMWHOLE': ['zmw_hole'],
+            'ISIZE': ['isizefwd', 'isizerev', 'zmw_isize'],
             'RQ': ['zmw_rqfwd', 'zmw_rqrev'],
-            'ECOV': ['zmw_ecfwd', 'zmw_ecrev'],
+            'EC': ['zmw_ecfwd', 'zmw_ecrev'],
             'MAPQ': ['zmw_mapqfwd', 'zmw_mapqrev'],
             'QQ': ['qqfwd', 'qqrev'],
             'BPD': ['bpenddist'],
             'MPS': ['mutationsperstrandorzmw'],
-            'VR': ['GermlineVariantReads', 'fwdsubreadsVariantReads', 'revsubreadsVariantReads'],
-            'TOT': ['GermlineTotalReads'],
-            'VAF': ['GermlineVAF', 'fwdsubreadsVAF', 'revsubreadsVAF'],
+            'GVR': ['GermlineVariantReads'],
+            'GTOT': ['GermlineTotalReads'],
+            'GVAF': ['GermlineVAF'],
+            'VR': ['fwdsubreadsVariantReads', 'revsubreadsVariantReads'],
+            'VAF': ['fwdsubreadsVAF', 'revsubreadsVAF'],
             'ALN': ['fwdsubreadscvgfraction', 'revsubreadscvgfraction']
             }
 
@@ -181,8 +191,10 @@ def format_header(VCF_version, INFO_tags, FORMAT_tags, sampleid, genome):
     '''
     '''
     reference = f'##reference={genome}'
+    REF = '##REF=<ID=REF,Description="REF_REFPLUSSTRAND when STRANDTYPE=dsDNA or REF_SSDNATEMPLATESTRAND when STRANDTYPE=ssDNA">'
+    ALT = '##ALT=<ID=ALT,Description="ALT_REFPLUSSTRAND when STRANDTYPE=dsDNA or ALT_SSDNATEMPLATESTRAND when STRANDTYPE=ssDNA">'
     columns = f'#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t{sampleid}\n'
-    header = [VCF_version, reference] + INFO_tags + FORMAT_tags
+    header = [VCF_version, reference, REF, ALT] + INFO_tags + FORMAT_tags
     return '\n'.join(header) + '\n' + columns
 
 def main(args):
@@ -214,7 +226,7 @@ def main(args):
                                 REF_SSDNASYNTHESIZEDSTRAND, ALT_SSDNASYNTHESIZEDSTRAND, TNC_SSDNASYNTHESIZEDSTRAND,
                                 REF_SSDNATEMPLATESTRAND, ALT_SSDNATEMPLATESTRAND, TNC_SSDNATEMPLATESTRAND
                             ],
-                            [RQ, ECOV, MAPQ, QQ, BPD, MPS, VR, TOT, VAF, ALN],
+                            [ZMWNAME, ZMWHOLE, ISIZE, RQ, EC, MAPQ, QQ, BPD, MPS, GVR, GTOT, GVAF, VR, VAF, ALN],
                             var.sampleid, var.genome
                             )
                     buffer_.write(header)
@@ -229,9 +241,13 @@ def main(args):
 ################################################
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(description='Convert HIDEF-seq TSV output to VCF')
+    parser = argparse.ArgumentParser(description='''
+                            Convert HIDEF-seq TSV output to VCF.
+                            The script will generate an output file for each combination of sampleid and filterid,
+                            appending _<sampleid>_<filterid> to the input file prefix or to OUTPREFIX if specified
+                            ''')
 
-    parser.add_argument('-i','--inputfile', help='HIDEF-seq output TSV file', required=True)
+    parser.add_argument('-i','--inputfile', help='HIDEF-seq print_mutations output TSV file', required=True)
     parser.add_argument('--outprefix', help='prefix to use for the output file', required=False)
 
     args = vars(parser.parse_args())
