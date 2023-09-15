@@ -2,7 +2,7 @@
 
 ################################################
 #
-#   Convert HIDEF-seq TSV output to VCF
+#   Convert HiDEF-seq TSV output to VCF
 #
 #   Michele Berselli
 #   berselli.michele@gmail.com
@@ -23,6 +23,7 @@ import sys, argparse, os
 VERSION = '##fileformat=VCFv4.2'
 
 # INFO DEFINITIONS
+FILTERID = '##INFO=<ID=FILTERID,Number=1,Type=String,Description="Filter set index number, i.e. the call was made using this filter set as defined in the config HiDEF-seq YAML file">'
 STRANDTYPE = '##INFO=<ID=STRANDTYPE,Number=1,Type=String,Description="ssDNA (ssDNA mismatch) or dsDNA (dsDNA mutation)">'
 SYNTHESIZEDSTRAND = '##INFO=<ID=SYNTHESIZEDSTRAND,Number=1,Type=String,Description="The strand of the reference genome to which the strand synthesized during sequencing aligned (+ or -). Annotated only for STRANDTYPE=ssDNA">'
 TEMPLATESTRAND = '##INFO=<ID=TEMPLATESTRAND,Number=1,Type=String,Description="The strand of the reference genome to which the \'template strand being copied during sequencing\' aligned (+ or -). This is the reverse of SYNTHESIZEDSTRAND. Annotated only for STRANDTYPE=ssDNA">'
@@ -42,19 +43,19 @@ TNC_SSDNATEMPLATESTRAND = '##INFO=<ID=TNC_SSDNATEMPLATESTRAND,Number=1,Type=Stri
 # FORMAT DEFINITIONS
 ZMWNAME = '##FORMAT=<ID=ZMWNAME,Number=1,Type=String,Description="Name of the ZMW in the ccs BAM file">'
 ZMWHOLE = '##FORMAT=<ID=ZMWHOLE,Number=1,Type=Integer,Description="ZMW hole # in the ccs BAM file">'
-ISIZE = '##FORMAT=<ID=ISIZE,Number=3,Type=Integer,Description="Length in bases of the strand sequence alignment in the reference genome (excludes insertions and soft-clipped bases) [FORWARD_STRAND, REVERSE_STRAND, OVERLAP_FORWARD_REVERSE_STRAND]">'
+ISIZE = '##FORMAT=<ID=ISIZE,Number=3,Type=Integer,Description="Length in bases of the reference genome alignment of the consensus sequence containing the call (excludes insertions and soft-clipped bases). Annotated for the synthesized strand if a ssDNA call and for the intersection of both strands if a dsDNA call; others set to \'.\'. [FORWARD_STRAND, REVERSE_STRAND, INTERSECTION_FORWARD_REVERSE_STRAND]">'
 RQ = '##FORMAT=<ID=RQ,Number=2,Type=Float,Description="Read quality (\'rq\' tag) of the strand consensus sequence [FORWARD_STRAND, REVERSE_STRAND]">'
 EC = '##FORMAT=<ID=EC,Number=2,Type=Float,Description="Effective coverage (\'ec\' tag; i.e., average number of subreads across consensus sequence) of the strand consensus sequence [FORWARD_STRAND, REVERSE_STRAND]">'
 MAPQ = '##FORMAT=<ID=MAPQ,Number=2,Type=Integer,Description="Mapping quality of the strand consensus sequence [FORWARD_STRAND, REVERSE_STRAND]">'
-QQ = '##FORMAT=<ID=QQ,Number=2,Type=Integer,Description="Base quality of the call position on the strand consensus sequence (\'.\' if ssDNA call, and the call is not on this strand) [FORWARD_STRAND, REVERSE_STRAND]">'
+QQ = '##FORMAT=<ID=QQ,Number=2,Type=Integer,Description="Base quality of the call position in the consensus sequence of the synthesized strand containing the call (\'.\' if ssDNA call, and the call is not on this strand) [FORWARD_STRAND, REVERSE_STRAND]">'
 BPD = '##FORMAT=<ID=BPD,Number=1,Type=Integer,Description="Distance of the call in bases from the start or end of the consensus sequence alignment, whichever is closer. Calculated for dsDNA calls on each end using the strand that is closer to the call">'
 MPS = '##FORMAT=<ID=MPS,Number=1,Type=Integer,Description="Number of post-filtering ssDNA or dsDNA calls called on the strand (for ssDNA calls) or duplex DNA molecule (for dsDNA calls), respectively, on which this call was made">'
 GVR = '##FORMAT=<ID=GVR,Number=1,Type=Integer,Description="Number of germline reads with the same sequence as the call, at the position of the call">'
 GTOT = '##FORMAT=<ID=GTOT,Number=1,Type=Integer,Description="Total number of germline reads at the position of the call">'
 GVAF = '##FORMAT=<ID=GVAF,Number=1,Type=Float,Description="Variant allele frequency of germline reads with the same sequence as the call, at the position of the call">'
-VR = '##FORMAT=<ID=VR,Number=2,Type=Integer,Description="Number of strand subreads with the same sequence as the call (\'.\' if ssDNA call, and the call is not on this strand) [FORWARD_STRAND, REVERSE_STRAND]">'
-VAF = '##FORMAT=<ID=VAF,Number=2,Type=Float,Description="Fraction of strand subreads with the same sequence as the call (\'.\' if ssDNA call, and the call is not on this strand) [FORWARD_STRAND, REVERSE_STRAND]">'
-ALN = '##FORMAT=<ID=ALN,Number=2,Type=Float,Description="Fraction of strand subreads aligning to the position of the call (\'.\' if ssDNA call, and the call is not on this strand) [FORWARD_STRAND, REVERSE_STRAND]">'
+VR = '##FORMAT=<ID=VR,Number=2,Type=Integer,Description="Number of subreads with the same sequence as the call for the synthesized strand containing the call (\'.\' if ssDNA call, and the call is not on this strand) [FORWARD_STRAND, REVERSE_STRAND]">'
+VAF = '##FORMAT=<ID=VAF,Number=2,Type=Float,Description="Fraction of subreads with the same sequence as the call for the synthesized strand containing the call (\'.\' if ssDNA call, and the call is not on this strand) [FORWARD_STRAND, REVERSE_STRAND]">'
+ALN = '##FORMAT=<ID=ALN,Number=2,Type=Float,Description="Fraction of subreads aligning to the position of the call in the consensus sequence of the synthesized strand containing the call (\'.\' if ssDNA call, and the call is not on this strand) [FORWARD_STRAND, REVERSE_STRAND]">'
 
 
 ################################################
@@ -115,6 +116,7 @@ class HIDEFSeqVariant(object):
         '''
         INFO = []
         tags = [
+            'filterid',
             'strandtype', 'synthesizedstrand', 'templatestrand',
             'ref_refplusstrand', 'alt_refplusstrand', 'tnc_refplusstrand',
             'ref32_refplusstrand', 'alt32_refplusstrand', 'tnc32_refplusstrand',
@@ -187,7 +189,7 @@ class HIDEFSeqVariant(object):
 ################################################
 #   Functions
 ################################################
-def format_header(VCF_version, INFO_tags, FORMAT_tags, sampleid, genome):
+def format_header(VCF_version, INFO_tags, FORMAT_tags, sampleid, genome, contigs=None):
     '''
     '''
     reference = f'##reference={genome}'
@@ -195,7 +197,38 @@ def format_header(VCF_version, INFO_tags, FORMAT_tags, sampleid, genome):
     ALT = '##ALT=<ID=ALT,Description="ALT_REFPLUSSTRAND when STRANDTYPE=dsDNA or ALT_SSDNATEMPLATESTRAND when STRANDTYPE=ssDNA">'
     columns = f'#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t{sampleid}\n'
     header = [VCF_version, reference, REF, ALT] + INFO_tags + FORMAT_tags
+    if contigs:
+        header += contigs
     return '\n'.join(header) + '\n' + columns
+
+def get_contigs(contigheader):
+    '''
+    '''
+    contigs = []
+    with open(contigheader) as fi:
+        for line in fi:
+            if line.startswith('@SQ'):
+                SN, LN, M5 = None, None, None
+                line = line.rstrip().split()
+                for i in line:
+                    if i.startswith('SN'):
+                        SN = i.replace('SN:', '')
+                    if i.startswith('LN'):
+                        LN = i.replace('LN:', '')
+                    if i.startswith('M5'):
+                        M5 = i.replace('M5:', '')
+                if SN:
+                    contig_ = f'##contig=<ID={SN}'
+                    if LN:
+                        contig_ += f',length={LN}'
+                    if M5:
+                        contig_ += f',md5={M5}'
+                    contig_ += '>'
+                    contigs.append(contig_)
+                else:
+                    raise ValueError()
+
+    return contigs
 
 def main(args):
     '''
@@ -203,9 +236,16 @@ def main(args):
     # Args
     inputfile = args['inputfile']
     basename = args['outprefix'] if args['outprefix'] else os.path.splitext(os.path.basename(inputfile))[0]
+    contigheader = args['contigheader'] if args['contigheader'] else None
+
+    # Get contigs
+    contigs = None
+    if contigheader:
+        contigs = get_contigs(contigheader)
 
     output_buffers = {}
 
+    # Convert variants
     with open(inputfile) as fi:
         for i, line in enumerate(fi):
             if i != 0: # Removing the header
@@ -220,6 +260,7 @@ def main(args):
                     header = format_header(
                             VERSION,
                             [
+                                FILTERID,
                                 STRANDTYPE, SYNTHESIZEDSTRAND, TEMPLATESTRAND,
                                 REF_REFPLUSSTRAND, ALT_REFPLUSSTRAND, TNC_REFPLUSSTRAND,
                                 REF32_REFPLUSSTRAND, ALT32_REFPLUSSTRAND, TNC32_REFPLUSSTRAND,
@@ -227,7 +268,8 @@ def main(args):
                                 REF_SSDNATEMPLATESTRAND, ALT_SSDNATEMPLATESTRAND, TNC_SSDNATEMPLATESTRAND
                             ],
                             [ZMWNAME, ZMWHOLE, ISIZE, RQ, EC, MAPQ, QQ, BPD, MPS, GVR, GTOT, GVAF, VR, VAF, ALN],
-                            var.sampleid, var.genome
+                            var.sampleid, var.genome,
+                            contigs = contigs
                             )
                     buffer_.write(header)
                     buffer_.write(var.to_VCF())
@@ -242,13 +284,14 @@ def main(args):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='''
-                            Convert HIDEF-seq TSV output to VCF.
+                            Convert HiDEF-seq TSV output to VCF.
                             The script will generate an output file for each combination of sampleid and filterid,
                             appending _<sampleid>_<filterid> to the input file prefix or to OUTPREFIX if specified
                             ''')
 
-    parser.add_argument('-i','--inputfile', help='HIDEF-seq print_mutations output TSV file', required=True)
+    parser.add_argument('-i','--inputfile', help='HiDEF-seq print_mutations output TSV file', required=True)
     parser.add_argument('--outprefix', help='prefix to use for the output file', required=False)
+    parser.add_argument('--contigheader', help='FASTA .dict file to use to add contigs information in the output VCF', required=False)
 
     args = vars(parser.parse_args())
 
