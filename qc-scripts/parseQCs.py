@@ -69,7 +69,7 @@ def main(qm_name, metrics, additional_files):
     tool and create a qc.json file. It will also create a zip archive with all 4 provided files.
 
     """
-    all_files = additional_files if additional_files else []
+    all_files = list(additional_files) if additional_files else []
     qmg = QMGeneric(qm_name)
 
     for m in metrics:
@@ -82,7 +82,8 @@ def main(qm_name, metrics, additional_files):
 
     # Write JSON object
     qmg.write_json(VALUES_FILENAME)
-    # Create Archive
+    # Create Archive after removing duplicates
+    all_files = list(set(all_files))
     qmg.create_archive(all_files, ARCHIVE_NAME)
 
 

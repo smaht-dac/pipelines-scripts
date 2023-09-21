@@ -2,6 +2,7 @@ import sys
 from metrics_to_extract import metrics
 from QMGeneric import QMValue
 from typing import List
+import json
 
 
 class Parser:
@@ -21,6 +22,8 @@ class Parser:
             return self.parse_picard_CollectInsertSizeMetrics()
         elif self.tool == "picard_CollectWgsMetrics":
             return self.parse_picard_CollectWgsMetrics()
+        elif self.tool == "bamstats":
+            return self.parse_bamstats()
         else:
             sys.exit(f"{self.tool} is not supported. Please add a parser to Parser.py")
 
@@ -35,8 +38,23 @@ class Parser:
                     if field in metrics['samtools']:
                         m = metrics['samtools'][field]
                         qmv = QMValue(
-                            m["name"], value, tooltip=m["tooltip"])
+                            m["key"], value, tooltip=m["tooltip"])
                         qm_values.append(qmv)
+        return qm_values
+    
+    def parse_bamstats(self) -> List[QMValue]:
+        qm_values = []
+        # Parse file and save values
+        fi = open(self.path)
+        bamstats_res = json.load(fi)
+        for key in bamstats_res.keys():
+            if key in metrics['bamstats']:
+                m = metrics['bamstats'][key]
+                value = bamstats_res[key]
+                qmv = QMValue(
+                    m["key"], value, tooltip=m["tooltip"])
+                qm_values.append(qmv)
+        fi.close()
         return qm_values
 
     def parse_picard_CollectAlignmentSummaryMetrics(self) -> List[QMValue]:
@@ -53,7 +71,7 @@ class Parser:
             if field in metrics['picard_CollectAlignmentSummaryMetrics']:
                 m = metrics['picard_CollectAlignmentSummaryMetrics'][field]
                 qmv = QMValue(
-                    m["name"], pair[i], tooltip=m["tooltip"])
+                    m["key"], pair[i], tooltip=m["tooltip"])
                 qm_values.append(qmv)
         return qm_values
 
@@ -79,7 +97,7 @@ class Parser:
                 if field in metrics['picard_CollectInsertSizeMetrics']:
                     m = metrics['picard_CollectInsertSizeMetrics'][field]
                     qmv = QMValue(
-                        m["name"]+f' ({orientation}) [Picard]', pair[i], tooltip=m["tooltip"])
+                        m["key"]+f' ({orientation}) [Picard]', pair[i], tooltip=m["tooltip"])
                     qm_values.append(qmv)
         return qm_values
 
@@ -102,6 +120,6 @@ class Parser:
             if field in metrics['picard_CollectWgsMetrics']:
                 m = metrics['picard_CollectWgsMetrics'][field]
                 qmv = QMValue(
-                    m["name"], stats[i], tooltip=m["tooltip"])
+                    m["key"], stats[i], tooltip=m["tooltip"])
                 qm_values.append(qmv)
         return qm_values
