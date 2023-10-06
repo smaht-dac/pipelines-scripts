@@ -37,8 +37,9 @@ class Parser:
                     field, value = line[1].replace(':', ''), line[2]
                     if field in metrics['samtools']:
                         m = metrics['samtools'][field]
+                        m_type = m["type"]
                         qmv = QMValue(
-                            m["key"], value, tooltip=m["tooltip"])
+                            m["key"], m_type(value), tooltip=m["tooltip"])
                         qm_values.append(qmv)
         return qm_values
     
@@ -51,8 +52,9 @@ class Parser:
             if key in metrics['bamstats']:
                 m = metrics['bamstats'][key]
                 value = bamstats_res[key]
+                m_type = m["type"]
                 qmv = QMValue(
-                    m["key"], value, tooltip=m["tooltip"])
+                    m["key"], m_type(value), tooltip=m["tooltip"])
                 qm_values.append(qmv)
         fi.close()
         return qm_values
@@ -70,8 +72,9 @@ class Parser:
         for i, field in enumerate(header):
             if field in metrics['picard_CollectAlignmentSummaryMetrics']:
                 m = metrics['picard_CollectAlignmentSummaryMetrics'][field]
+                m_type = m["type"]
                 qmv = QMValue(
-                    m["key"], pair[i], tooltip=m["tooltip"])
+                    m["key"], m_type(pair[i]), tooltip=m["tooltip"])
                 qm_values.append(qmv)
         return qm_values
 
@@ -96,8 +99,9 @@ class Parser:
             for i, field in enumerate(header):
                 if field in metrics['picard_CollectInsertSizeMetrics']:
                     m = metrics['picard_CollectInsertSizeMetrics'][field]
+                    m_type = m["type"]
                     qmv = QMValue(
-                        m["key"]+f' ({orientation}) [Picard]', pair[i], tooltip=m["tooltip"])
+                        m["key"]+f' ({orientation}) [Picard]', m_type(pair[i]), tooltip=m["tooltip"])
                     qm_values.append(qmv)
         return qm_values
 
@@ -119,7 +123,8 @@ class Parser:
         for i, field in enumerate(header):
             if field in metrics['picard_CollectWgsMetrics']:
                 m = metrics['picard_CollectWgsMetrics'][field]
+                m_type = m["type"]
                 qmv = QMValue(
-                    m["key"], stats[i], tooltip=m["tooltip"])
+                    m["key"], m_type(stats[i]), tooltip=m["tooltip"])
                 qm_values.append(qmv)
         return qm_values
