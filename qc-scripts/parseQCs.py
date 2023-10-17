@@ -21,7 +21,7 @@ from QMGeneric import QMGeneric
 from MetricsParser import Parser
 
 ########################################################################
-# Global Variables
+# Static Variables
 ########################################################################
 VALUES_FILENAME = 'qc_values.json'
 ARCHIVE_NAME = 'metrics.zip'
@@ -55,7 +55,7 @@ ARCHIVE_NAME = 'metrics.zip'
 )
 def main(qm_name, metrics, additional_files):
     """
-    This script gathers metrics from different tools and creates a QualityMetricGeneric Item for the portal.
+    This script gathers metrics from different tools and creates a QualityMetricGeneric item compatible JSON.
 
     Example usage:
     python parseQCs.py \
