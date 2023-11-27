@@ -40,9 +40,8 @@ def header_as_str(header):
 def get_read_group_illumina(query_name):
     qn_as_list = query_name.split(':')
     l = len(qn_as_list) # number of fields in query_name
-    if l == 7 or l == 10: # NEW style read name
-                          #  7  -> <instrument>:<run number>:<flowcell ID>:<lane>:<tile>:<x-pos>:<y-pos>
-                          #  10 -> <instrument>:<run number>:<flowcell ID>:<lane>:<tile>:<x-pos>:<y-pos> <read>:<is filtered>:<control number>:<sample number>
+    if l == 7: # NEW style read name
+               #  <instrument>:<run number>:<flowcell ID>:<lane>:<tile>:<x-pos>:<y-pos>
         instrument_run_flowcell = '_'.join(qn_as_list[:3])
         lane = qn_as_list[3]
         return f'{instrument_run_flowcell}.{lane}'
