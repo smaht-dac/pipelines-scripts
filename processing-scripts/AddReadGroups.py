@@ -37,19 +37,25 @@ def header_as_str(header):
             str_header += s.rstrip() + '\n'
     return str_header
 
-def get_read_group(query_name):
+def get_read_group_illumina(query_name):
     qn_as_list = query_name.split(':')
     l = len(qn_as_list) # number of fields in query_name
-    if l == 7: # new style header
+    if l == 7 or l == 10: # NEW style read name
+                          #  7  -> <instrument>:<run number>:<flowcell ID>:<lane>:<tile>:<x-pos>:<y-pos>
+                          #  10 -> <instrument>:<run number>:<flowcell ID>:<lane>:<tile>:<x-pos>:<y-pos> <read>:<is filtered>:<control number>:<sample number>
         instrument_run_flowcell = '_'.join(qn_as_list[:3])
         lane = qn_as_list[3]
         return f'{instrument_run_flowcell}.{lane}'
-    elif l == 5: # old style header
+    elif l == 5: # OLD style read name
+                 #  H0164ALXX140820:2:1101:10003:23460
+                 #  H0164____________ <flowcell ID>
+                 #  _____ALXX140820__ <barcode or index in a multiplexed run>
+                 #  _______________:2 <lane>
         return '.'.join(qn_as_list[:2])
-    elif l == 1: # weird style header, just use a placeholder
+    elif l == 1: # modified read name, just use a placeholder
         return 'READGROUP'
     else:
-        sys.exit('\nFORMAT ERROR: read format {0} not recognized\n'
+        sys.exit('\nFORMAT ERROR: read name format {0} not recognized\n'
                     .format(query_name))
 
 def check_EOF(filename):
@@ -89,7 +95,7 @@ def main(args):
     header.setdefault('RG', [])
 
     for read in samfile:
-        QNAME = get_read_group(read.query_name)
+        QNAME = get_read_group_illumina(read.query_name)
         QNAMEs.add(QNAME)
 
     # Update header with read groups
@@ -109,7 +115,7 @@ def main(args):
     pipe_in = subprocess.Popen(['samtools', 'view', '--no-PG', '-h', '-@ {0}'.format(threads), args['inputfile']], stdout=subprocess.PIPE)
     samfile = ps.AlignmentFile(pipe_in.stdout, 'r')
     for read in samfile:
-        QNAME = get_read_group(read.query_name)
+        QNAME = get_read_group_illumina(read.query_name)
         ID = f'{samplename}.{QNAME}'
         # not using pysam to add read tag because somehow it is doing
         # something extremely slow and locking all the multi-threading
