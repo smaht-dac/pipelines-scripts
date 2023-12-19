@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 
 # *******************************************
-# Replace SAMPLE and LIBRARY
-# or only SAMPLE across read groups
-# in BAM input file.
-# Index the ouput file
+# Replace SAMPLE and LIBRARY or
+# only SAMPLE across read groups in BAM input file.
+# Index the ouput file.
 # *******************************************
 
 ## Usage
@@ -32,8 +31,8 @@ while getopts 'i:s:l:o:h' opt; do
   case $opt in
     # Required arguments
     i) input_file_bam=${OPTARG} ;;
-    # Optional arguments
     s) sample_name=${OPTARG} ;;
+    # Optional arguments
     l) library=${OPTARG} ;;
     o) output_prefix=${OPTARG} ;;
     ?|h)
