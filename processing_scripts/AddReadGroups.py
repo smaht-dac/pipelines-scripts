@@ -141,7 +141,7 @@ if __name__ == '__main__':
     parser.add_argument('-i','--inputfile', help='Input BAM file', required=True)
     parser.add_argument('-s','--samplename', help='Name of the sample', required=True)
     parser.add_argument('-l','--library', help='Identifier for the sequencing library preparation [LIBRARY]', required=False)
-    parser.add_argument('-p','--platform', help='Name of the sequencing platform (ILLUMINA, ION_TORRENT, LS454, PACBIO, COMPLETE_GENOMICS, DNBSEQ) [ILLUMINA]', required=False)
+    parser.add_argument('-p','--platform', help='Name of the sequencing platform (ILLUMINA) [ILLUMINA]', required=False)
     parser.add_argument('-d','--directory', help='Directory to use to write results [.]', required=False)
     parser.add_argument('-t','--threads', help='Number of threads to use for compression/decompression [1]', required=False)
     parser.add_argument('-x','--index', action='store_true', help='Create index for the output file, the input file must be sorted by coordinates')
