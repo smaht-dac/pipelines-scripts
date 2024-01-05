@@ -20,8 +20,6 @@ import argparse
 import json
 import boto3
 import zipfile
-import shutil
-import glob
 import subprocess
 from dcicutils import ff_utils, s3_utils
 
@@ -112,7 +110,7 @@ if __name__ == '__main__':
     parser.add_argument('--ff_env', help='Environment to use', required=True)
     parser.add_argument('-o','--output_name', default='metrics', help='Name of the output [metrics]', required=False)
     parser.add_argument('-d','--working_dir', default='.', help='Working directory [.]', required=False)
-    parser.add_argument('--keydicts_json', default='/Users/berse/.smaht-keys.json',
+    parser.add_argument('--keydicts_json', default='~/.smaht-keys.json',
                         help='Path to file with keys for portal auth in JSON format [~/.smaht-keys.json]', required=False)
 
     args = vars(parser.parse_args())
