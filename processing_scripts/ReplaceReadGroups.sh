@@ -59,3 +59,25 @@ fi
 
 # Index
 samtools index -@ $nt ${output_prefix}.bam || exit 1
+
+# Check BAM integrity
+py_script="
+import sys, os
+
+def check_EOF(filename):
+    EOF_hex = b'\x1f\x8b\x08\x04\x00\x00\x00\x00\x00\xff\x06\x00\x42\x43\x02\x00\x1b\x00\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+    size = os.path.getsize(filename)
+    fb = open(filename, 'rb')
+    fb.seek(size - 28)
+    EOF = fb.read(28)
+    fb.close()
+    if EOF != EOF_hex:
+        sys.stderr.write('EOF is missing\n')
+        sys.exit(1)
+    else:
+        sys.stderr.write('EOF is present\n')
+
+check_EOF('${output_prefix}.bam')
+"
+
+python -c "$py_script" || exit 1
