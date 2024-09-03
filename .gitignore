@@ -10,3 +10,5 @@ _templates
 **/build
 **/source
 .idea/
+.vscode/
+
