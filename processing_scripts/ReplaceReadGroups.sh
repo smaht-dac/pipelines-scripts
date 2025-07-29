@@ -3,11 +3,13 @@
 # *******************************************
 # Replace SAMPLE and LIBRARY or
 # only SAMPLE across read groups in BAM input file.
-# Index the ouput file.
+# Index the output file.
+# Can support CRAM input files, but will produce a BAM output.
+# If CRAM input is used, a reference FASTA must be provided.
 # *******************************************
 
 ## Usage
-USAGE="Usage: ReplaceReadGroups.sh -i <input_file_bam> -s <sample_name> [-l <library>] [-o output_prefix]"
+USAGE="Usage: ReplaceReadGroups.sh -i <input_file_bam> -s <sample_name> [-l <library>] [-o output_prefix] [-r <reference_fasta> (CRAM input)]"
 
 ## Default args
 output_prefix="output"
@@ -27,7 +29,7 @@ check_args()
 }
 
 ## Bash command line definition
-while getopts 'i:s:l:o:h' opt; do
+while getopts 'i:s:l:o:r:h' opt; do
   case $opt in
     # Required arguments
     i) input_file_bam=${OPTARG} ;;
@@ -35,6 +37,7 @@ while getopts 'i:s:l:o:h' opt; do
     # Optional arguments
     l) library=${OPTARG} ;;
     o) output_prefix=${OPTARG} ;;
+    r) reference_fasta=${OPTARG} ;;
     ?|h)
       echo $USAGE 1>&2
       exit 1
@@ -45,6 +48,19 @@ shift $(($OPTIND -1))
 
 ## Check arguments
 check_args input_file_bam sample_name
+
+## Check if input is CRAM
+if [[ $input_file_bam == *.cram ]]; then
+  if [ -z ${reference_fasta} ]; then
+    echo "Reference FASTA is required for CRAM input" 1>&2
+    echo $USAGE 1>&2
+    exit 1
+  fi
+  # Convert CRAM to BAM
+  tmp_bam="tmp.${RANDOM}.bam"
+  samtools view --no-PG -@ $nt -bh -T $reference_fasta $input_file_bam > $tmp_bam || exit 1
+  input_file_bam="$tmp_bam"
+fi
 
 # Update @RG
 if [ ! -z ${library} ]; then
